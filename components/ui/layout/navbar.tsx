@@ -3,11 +3,13 @@ import Link from "next/link";
 import { Input } from "../input";
 import { buttonVariants } from "../button";
 import { cn } from "@/lib/utils";
-
+import { SignedOut, SignedIn, UserButton } from "@neondatabase/auth/react";
+import { Bell } from "lucide-react"
+import { Button } from "../button"
 export function Navbar(){
     return (
         <header className="sticky top-0 z-50 border-border bg-background/90 backdrop-blur-md">
-            {/* logo on left isde */}
+            {/* logo on lefll isde */}
             <div className="mx-auto flex h-14 max-w-[1200px] items-center gap-4 px-4">
                 <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight text-foreground">
                 
@@ -25,11 +27,34 @@ export function Navbar(){
                     aria-label="Search posts"/>
                 </div>
                 {/* signup info */}
+                {/* SignedIn -- code inside is visible only when the user is logged in */}
+                <SignedIn>
+                    {/* we will have a create button to ccreate a new query or post */}
+                    <Link href="/submit" className={cn(
+                    buttonVariants({variant: "outline", size: "sm"}),
+                    "hidden sm:inline-flex"
+                    )}>
+                        Create
+                    </Link>
+                    {/* ! notificationbutton */}
+                    <Button 
+                    variant='ghost'
+                    size="icon"
+                    className='text-muted-foreground'
+                    arial-label="Notifications">
+                        <Bell className="size-5"/>
+                    </Button>
+                    <UserButton/>
+                </SignedIn>
+                {/* SignedOut -- code inside is visible only when the user is not logedin */}
+                <SignedOut>
+
                 <div className="ml-auto flex items-center gap-2">
                     <Link href={"/auth/sign-in"} className={cn(buttonVariants({variant: "ghost",size:"default"}))}> Log In </Link>
                     <Link href={"/auth/sign-up"} className={cn(buttonVariants({variant: "default"}))}> Sign Up </Link>
                     {/* sign up means regsiter */}
                 </div>
+                </SignedOut>
             </div>
 
         </header>
