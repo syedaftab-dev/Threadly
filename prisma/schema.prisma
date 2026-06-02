@@ -12,3 +12,13 @@ datasource db {
   provider = "postgresql"
 }
 
+model UserProfiles {
+  id        String   @id 
+  username  String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  // ! @map("created_at") --> createdAt ka dusra naam created_at bhi rakhe
+  @@map("user_profiles")
+  // @@map("user_profiles") --> table ka dusra naam user_profiles bhi rakhe
+}
+
+//!  app creating a new model do, npm run db:push

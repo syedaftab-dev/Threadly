@@ -27,7 +27,8 @@ export function Navbar(){
                 {/* signup info */}
                 <div className="ml-auto flex items-center gap-2">
                     <Link href={"/auth/sign-in"} className={cn(buttonVariants({variant: "ghost",size:"default"}))}> Log In </Link>
-                    <Link href={"/auth/sign-up"} className={cn(buttonVariants({variant: "default"}))}> Sign UP </Link>
+                    <Link href={"/auth/sign-up"} className={cn(buttonVariants({variant: "default"}))}> Sign Up </Link>
+                    {/* sign up means regsiter */}
                 </div>
             </div>
 
