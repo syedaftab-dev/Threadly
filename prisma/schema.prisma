@@ -13,18 +13,11 @@ datasource db {
 }
 
 model UserProfiles {
-  id        String   @id
-  username  String   @unique
+  id String @id
+  username String @unique
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  // @@map("user_profiles") --> table ka dusra naam user_profiles bhi rakhe
-
-  // ! @map("created_at") --> createdAt ka dusra naam created_at bhi rakhe
   @@map("user_profiles")
 }
-
-//!  app creating a new model do, npm run db:push
-
-// post table
 
 model Post {
   id        String   @id @default(uuid()) @db.Uuid
@@ -34,28 +27,52 @@ model Post {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   postTags PostTag[]
+  comments Comment[]
+
   @@map("posts")
 }
 
-model Tag{
-  slug String @id
-  label String
+model Tag {
+  slug      String @id
+  label     String
   hashColor String @map("hash_color")
+
   postTags PostTag[]
+
   @@map("tags")
 }
 
 
-// we have #tags for posts, so we need a table to store the relationship between posts and tags
 model PostTag {
-  postId String @map("post_id") @db.Uuid
+  postId  String @map("post_id") @db.Uuid
   tagSlug String @map("tag_slug")
 
-  post Post @relation(fields: [postId], references: [id],onDelete: Cascade)
-
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   tag Tag @relation(fields: [tagSlug], references: [slug])
 
-  @@id([postId,tagSlug])
-  
+  @@id([postId, tagSlug])
   @@map("post_tags")
+}
+
+model Comment {
+  id        String   @id @default(uuid()) @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  authorId  String   @map("author_id")
+  parentId  String?  @map("parent_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Vote {
+  userId     String @map("user_id")
+  targetType String @map("target_type")
+  targetId   String @map("target_id") @db.Uuid
+  value      Int    @db.SmallInt
+
+  @@id([userId, targetType, targetId])
+  @@map("votes")
 }
