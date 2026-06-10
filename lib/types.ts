@@ -6,9 +6,20 @@ export interface User {
 }
 
 export interface Tag {
-    id: string;
-    name: string;
     slug: string;
+    label: string;
+    hashColor: string;
     description?: string;
     postCount?: number;
+}
+export type FeedSort = "hot" | "new" | "top";
+
+export interface Post{
+    id:string;
+    autherId:string;
+    title:string;
+    body: string;
+    tagSlugs: string[];
+    createdAt: string;
+    commentCount: number;
 }
