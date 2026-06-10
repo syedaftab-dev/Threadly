@@ -2,7 +2,7 @@ import { formatCount } from "@/lib/format";
 import { Tag } from "@/lib/types";
 import Link from "next/link";
 
-export function LeftTags({ items }: { items: { tag: Tag; count: number }[] }) {
+export function LeftTags({ items = [] }: { items?: { tag: Tag; count: number }[] }) {
   const sorted = [...items].sort((a, b) => b.count - a.count).slice(0, 8);
   return (
     <ul className="space-y-2">

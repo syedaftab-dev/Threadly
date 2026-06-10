@@ -48,12 +48,31 @@ export async function listPostsSorted(
   sort: FeedSort,
   tagFilter: string | undefined,
   userId: string | undefined,
+  searchQuery?: string,
 ): Promise<FeedPostRow[]> {
-  const where = tagFilter
-    ? { postTags: { some: { tagSlug: tagFilter.toLowerCase() } } }
-    : undefined;
+  const where: any = {};
+
+  if (tagFilter && searchQuery) {
+    where.AND = [
+      { postTags: { some: { tagSlug: tagFilter.toLowerCase() } } },
+      {
+        OR: [
+          { title: { contains: searchQuery, mode: "insensitive" } },
+          { body: { contains: searchQuery, mode: "insensitive" } },
+        ],
+      },
+    ];
+  } else if (tagFilter) {
+    where.postTags = { some: { tagSlug: tagFilter.toLowerCase() } };
+  } else if (searchQuery) {
+    where.OR = [
+      { title: { contains: searchQuery, mode: "insensitive" } },
+      { body: { contains: searchQuery, mode: "insensitive" } },
+    ];
+  }
+
   const postRows = await prisma.post.findMany({
-    where,
+    where: Object.keys(where).length > 0 ? where : undefined,
     orderBy: { createdAt: "desc" },
     take: 50,
   });
