@@ -2,6 +2,11 @@
   <h1>🧵 Threadly</h1>
   <p>A high-performance, modern feed and community platform designed for seamless user engagement.</p>
   
+  <a href="https://threadly-bay.vercel.app/">
+    <img src="https://img.shields.io/badge/🟢_Live_Deployment-Vercel-black?style=for-the-badge&logo=vercel" alt="Live Deployment on Vercel" />
+  </a>
+  <br /><br />
+
   [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](#)
   [![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](#)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](#)
