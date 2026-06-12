@@ -3,20 +3,23 @@ import { cn } from "@/lib/utils";
 import { Flame, Sparkles, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
-function hrefFor(sort: FeedSort, tag?: string) {
+function hrefFor(sort: FeedSort, tag?: string, q?: string) {
   const params = new URLSearchParams();
   if (sort !== "hot") params.set("sort", sort);
   if (tag) params.set("tag", tag);
-  const q = params.toString();
-  return q ? `/?${q}` : "/";
+  if (q) params.set("q", q);
+  const str = params.toString();
+  return str ? `/?${str}` : "/";
 }
 
 export function FeedSortTabs({
   current,
   tag,
+  q,
 }: {
   current: FeedSort;
   tag?: string;
+  q?: string;
 }) {
   const tabs: { id: FeedSort; label: string; icon: typeof Flame }[] = [
     { id: "hot", label: "Hot", icon: Flame },
@@ -32,7 +35,7 @@ export function FeedSortTabs({
           return (
             <Link
               key={id}
-              href={hrefFor(id, tag)}
+              href={hrefFor(id, tag, q)}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
                 active

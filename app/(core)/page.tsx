@@ -13,7 +13,7 @@ import { FeedSort, Tag } from "@/lib/types";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string; tag?: string }>;
+  searchParams: Promise<{ sort?: string; tag?: string; q?: string }>;
 }) {
   const sp = await searchParams;
   const sortRaw = sp.sort;
@@ -21,9 +21,10 @@ export default async function Home({
     sortRaw === "new" || sortRaw === "top" ? sortRaw : "hot";
 
   const tagFilter = sp.tag?.toLowerCase();
+  const searchQuery = sp.q;
 
   const sessionUser = await getSessionUser();
-  const rows = await listPostsSorted(sort, tagFilter, sessionUser?.id);
+  const rows = await listPostsSorted(sort, tagFilter, sessionUser?.id, searchQuery);
 
   const tags = await listTags();
   const tagMap = new Map(tags.map((t) => [t.slug, t]));
@@ -53,7 +54,7 @@ export default async function Home({
   return (
     <div className="flex gap-8">
       <div className="min-w-0 flex-1">
-        <FeedSortTabs current={sort} tag={tagFilter} />
+        <FeedSortTabs current={sort} tag={tagFilter} q={searchQuery} />
         <div className="space-y-4">
           {cards}
           {rows.length === 0 && (

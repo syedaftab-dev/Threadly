@@ -353,3 +353,92 @@ export async function listCommentsForPost(postId: string): Promise<Comment[]> {
     createdAt: c.createdAt.toISOString(),
   }));
 }
+
+export type NotificationItem = {
+  id: string;
+  type: "comment" | "reply";
+  createdAt: string;
+  actor: User;
+  post: { id: string; title: string };
+  bodyPreview: string;
+};
+
+export async function getNotifications(userId: string): Promise<NotificationItem[]> {
+  const myPosts = await prisma.post.findMany({
+    where: { authorId: userId },
+    select: { id: true, title: true },
+  });
+  const myPostIds = myPosts.map((p) => p.id);
+  const postMap = new Map(myPosts.map((p) => [p.id, p]));
+
+  const commentsOnMyPosts = myPostIds.length > 0
+    ? await prisma.comment.findMany({
+        where: {
+          postId: { in: myPostIds },
+          authorId: { not: userId },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 30,
+      })
+    : [];
+
+  const myComments = await prisma.comment.findMany({
+    where: { authorId: userId },
+    select: { id: true },
+  });
+  const myCommentIds = myComments.map((c) => c.id);
+
+  const repliesToMyComments = myCommentIds.length > 0
+    ? await prisma.comment.findMany({
+        where: {
+          parentId: { in: myCommentIds },
+          authorId: { not: userId },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 30,
+      })
+    : [];
+
+  const allComments = [...commentsOnMyPosts];
+  const seenIds = new Set(allComments.map((c) => c.id));
+  
+  for (const r of repliesToMyComments) {
+    if (!seenIds.has(r.id)) {
+      allComments.push(r);
+      seenIds.add(r.id);
+    }
+  }
+
+  allComments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  const topComments = allComments.slice(0, 20);
+  if (topComments.length === 0) return [];
+
+  const actorIds = [...new Set(topComments.map((c) => c.authorId))];
+  const actorMap = await batchAuthorsForIds(actorIds);
+
+  const neededPostIds = [...new Set(topComments.filter((c) => !postMap.has(c.postId)).map((c) => c.postId))];
+  if (neededPostIds.length > 0) {
+    const extraPosts = await prisma.post.findMany({
+      where: { id: { in: neededPostIds } },
+      select: { id: true, title: true },
+    });
+    for (const p of extraPosts) {
+      postMap.set(p.id, p);
+    }
+  }
+
+  return topComments.map((c) => {
+    const actor = actorMap.get(c.authorId) ?? { id: c.authorId, username: `user_${c.authorId.slice(0, 6)}`, displayName: `user_${c.authorId.slice(0, 6)}` };
+    const post = postMap.get(c.postId) ?? { id: c.postId, title: "Deleted Post" };
+    const isReply = c.parentId !== null && myCommentIds.includes(c.parentId);
+
+    return {
+      id: c.id,
+      type: isReply ? ("reply" as const) : ("comment" as const),
+      createdAt: c.createdAt.toISOString(),
+      actor,
+      post,
+      bodyPreview: c.body.length > 80 ? `${c.body.slice(0, 80)}…` : c.body,
+    };
+  });
+}
